@@ -1,22 +1,28 @@
-var maxIssueCount = 50;
+var YouTrack = (function () {
 
-var YOUTRACK = (function () {
-
-  var authToken;
+  let authToken;
 
   chrome.storage.sync.get('authToken', function (data) {
     authToken = data.authToken;
   });
 
-  var issues = [];
-  var visitedIssueIds = [];
-  var issuesToVisitCounter = 1;
+  let resultsList;
+  let visitedIssueIds;
+  let issuesToVisitCounter;
+  let maxDepthLevel;
 
-  function loadIssues(rootIssueId, callback) {
+  function loadIssues(rootIssueId, depthLevel, callback) {
+    resultsList = [];
+    visitedIssueIds = [rootIssueId];
+    maxDepthLevel = depthLevel;
+    issuesToVisitCounter = 1;
+    loadIssuesInternal(rootIssueId, callback, 0);
+  }
+
+  function loadIssuesInternal(rootIssueId, callback, depth) {
     let getUrl = function (rootIssueId) {
-      return `https://youtrack.jetbrains.com/api/issues/${rootIssueId}?fields=id,project(shortName),numberInProject,summary,wikifiedDescription,fields(projectCustomField(field(name)),value(name)),links(direction,linkType(name,directed,sourceToTarget,targetToSource),issues(id,project(shortName),numberInProject)),votes,tags(name),attachments(id)`;
+      return `https://youtrack.jetbrains.com/api/issues/${rootIssueId}?fields=id,project(shortName),numberInProject,summary,wikifiedDescription,resolved,fields(projectCustomField(field(name)),value(name)),links(direction,linkType(name,directed,sourceToTarget,targetToSource),issues(id,project(shortName),numberInProject)),votes,tags(name),attachments(id)`;
     };
-    visitedIssueIds.push(rootIssueId); // TODO weak check; change somehow
 
     let deferred = $.ajax({
       url: getUrl(rootIssueId),
@@ -27,9 +33,12 @@ var YOUTRACK = (function () {
           xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
         }
       },
-      success: function(issue) {
-        issues.push(issue);
+      success: function (issue) {
+        resultsList.push(issue);
 
+        if (depth === maxDepthLevel) {
+          return;
+        }
         for (let key in issue.links) {
           let issueLink = issue.links[key];
           for (let key in issueLink.issues) {
@@ -38,25 +47,25 @@ var YOUTRACK = (function () {
             if (visitedIssueIds.indexOf(linkedIssueId) > -1) {
               continue;
             }
-            if (visitedIssueIds.length <  maxIssueCount) {
-              issuesToVisitCounter++;
-              loadIssues(linkedIssueId, callback);
-            }
+            issuesToVisitCounter++;
+            visitedIssueIds.push(rootIssueId);
+            loadIssuesInternal(linkedIssueId, callback, 1 + depth);
           }
         }
       },
-      error: function(xhr, status, object) {
+      error: function (xhr, status, object) {
         console.error("Unable to load issues: " + status);
         console.error(object);
       },
-      complete: function() {
+      complete: function () {
         issuesToVisitCounter--;
       }
     });
 
     $.when(deferred).done(function(){
       if (issuesToVisitCounter === 0) {
-        callback(issues);
+        localStorage["nodesAmount"] = resultsList.length;
+        callback(resultsList);
       }
     });
   }

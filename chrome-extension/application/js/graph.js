@@ -1,38 +1,52 @@
-var GRAPH = (function(){
+var Graph = (function () {
 
   // http://js.cytoscape.org/#layouts/preset
+  
+  let options = {
+    layout: Settings.layoutType.cose,
+  };
 
-  var layout = {
-  name: 'euler',
-      randomize: true,
-      animate: false,
-      springLength: 500
-};
+  document.onkeyup = function (e) {
+    if (e.code === "KeyD") {
+      hideResolved();
+      cy.layout(options.layout).run();
+    }
+  };
 
-  // var layout = {
-  //   name: 'breadthfirst',
-  //   fit: true, // whether to fit the viewport to the graph
-  //   padding: 30, // padding on fit
-  //   spacingFactor: 1, // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
-  //   nodeDimensionsIncludeLabels: true, // Excludes the label when calculating node bounding boxes for the layout algorithm
-  //
-  //   grid: false, // whether to create an even grid into which the DAG is placed (circle:false only)
-  //   circle: false, // put depths in concentric circles if true, put depths top down if false
-  //   avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
-  //   roots: undefined, // the roots of the trees
-  //   maximal: true, // whether to shift nodes down their natural BFS depths in order to avoid upwards edges (DAGS only)
-  //   directed: false, // whether the tree is directed downwards (or edges can point in any direction if false)
-  // };
+  function hideResolved() {
+    let activeNodes = [];
+    cy.nodes().forEach(function (node) {
+      if (node.data().issueData.resolved) {
+        let isDisplayed = node.data("display");
+        node.data("display", isDisplayed === "none" ? "element" : "none");
+      } else {
+        activeNodes.push(node);
+      }
+    });
+    setTimeout( function() {
+      cy.fit(cy.$("node[display = 'element']"), 30);
+    }, 100);
+  }
+
+  function onGraphLoaded() {
+    // TODO make nodes hidden by default
+    // if (!Settings.renderClosedIssues()) {
+    //   hideResolved();
+    // }
+  }
 
   function render(issuesList) {
     let nodes = [], edges = [];
     for (let key in issuesList) {
       let issue = issuesList[key];
+
       let node = {
         data: {
           label: issue.summary,
           name: issue.project.shortName + '-' + issue.numberInProject,
-          id: issue.id
+          id: issue.id,
+          issueData: issue,
+          display: "element"
         },
         classes: 'bottom-center multiline-auto'
       };
@@ -45,22 +59,17 @@ var GRAPH = (function(){
         for (let key in link.issues) {
           let linkedIssue = link.issues[key];
 
-          let edgeData;
-          if (!link.linkType.directed) {
-            edgeData = {
-              source: issue.id,
-              target: linkedIssue.id
-            }
-          } else if (link.direction === "INWARD") {
-            edgeData = {
-              source: linkedIssue.id,
-              target: issue.id
-            }
+          let edgeData = {
+            direction: link.direction,
+            linkType: link.linkType
+          };
+          if (link.direction === "OUTWARD") {
+            edgeData.source = linkedIssue.id;
+            edgeData.target = issue.id;
           } else {
-            edgeData = {
-              source: issue.id,
-              target: linkedIssue.id
-            }
+            // either not directed or "OUTWARD"
+            edgeData.source = issue.id;
+            edgeData.target = linkedIssue.id;
           }
 
           let duplicateEdge = false;
@@ -89,156 +98,103 @@ var GRAPH = (function(){
       }
     }
 
-    console.log(nodes);
-    console.log(edges);
+    {
+      function getNodeSize(votesCount) {
+        if (votesCount === 0) {
+          return Settings.defaults.minNodeSize;
+        }
+        if (votesCount > Settings.defaults.maxVotesMatter) {
+          votesCount = Settings.defaults.maxVotesMatter;
+        }
+        let multiplier = 3; // 2, 3 or 4
+        let number = Math.round(Math.log(votesCount) * multiplier);
+        let nodeSizeDiff = Settings.defaults.maxNodeSize - Settings.defaults.minNodeSize;
+
+        let denominator = (Math.log(Settings.defaults.maxVotesMatter) * multiplier);
+        return Math.floor(number * nodeSizeDiff / denominator) + Settings.defaults.minNodeSize;
+      }
+
+      function interpolateColors(color1, color2, steps) {
+        let interpolateColor = function (color1, color2, factor) {
+          let result = color1.slice();
+          for (let i = 0; i < 3; i++) {
+            result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+          }
+          return result;
+        };
+        let stepFactor = 1 / (steps - 1), colors = [];
+        color1 = color1.match(/\d+/g).map(Number);
+        color2 = color2.match(/\d+/g).map(Number);
+
+        for (let i = 0; i < steps; i++) {
+          let color = interpolateColor(color1, color2, stepFactor * i);
+          colors.push(`rgb(${color[0]},${color[1]},${color[2]})`);
+        }
+        return colors;
+      }
+
+      let colors = interpolateColors(Settings.defaults.colorMin, Settings.defaults.colorMax,
+          Settings.defaults.maxNodeSize - Settings.defaults.minNodeSize + 1);
+
+      for (let node of nodes) {
+        let nodeSize = getNodeSize(node.data.issueData.votes);
+        node.data.width = nodeSize;
+        node.data.height = nodeSize;
+
+        if (node.data.issueData.resolved) {
+          node.classes += " resolved";
+        } else {
+          node.data.color = colors[nodeSize - Settings.defaults.maxNodeSize + Settings.defaults.minNodeSize];
+          console.log(nodeSize - Settings.defaults.maxNodeSize + Settings.defaults.minNodeSize);
+        }
+      }
+
+      for (let edge of edges) {
+        // http://js.cytoscape.org/#style/edge-line
+        // http://js.cytoscape.org/#style/edge-arrow
+        switch (edge.data.linkType.name) {
+          default:
+            console.log("Unknown link type: " + name);
+          case "Relates":
+          case "Folllowed":
+          case "Reused in":
+          case "Leads to":
+            break;
+          case "Depend":
+            break;
+          case "Duplicate":
+            edge["classes"] = "duplicate";
+            break;
+          case "Subtask":
+            // edge.data["target-arrow-shape"] = "diamond";
+            break;
+          case "Similar":
+
+            break;
+          case "Cause": // fixed by/also fixes
+
+            break;
+        }
+      }
+    }
 
     // http://js.cytoscape.org/#init-opts/container
     window.cy = cytoscape({
       container: document.getElementById('graph'),
 
-      boxSelectionEnabled: false,
-      autounselectify: true,
+      layout: options.layout,
 
-      layout: layout,
-
-      style: [
-        {
-          "selector": "node[label]",
-          "style": {
-            "label": "data(label)"
-          }
-        },
-
-        {
-          "selector": "edge[label]",
-          "style": {
-            "label": "data(label)",
-            "width": 3
-          }
-        },
-
-        {
-          "selector": ".top-left",
-          "style": {
-            "text-valign": "top",
-            "text-halign": "left"
-          }
-        },
-
-        {
-          "selector": ".top-center",
-          "style": {
-            "text-valign": "top",
-            "text-halign": "center"
-          }
-        },
-
-        {
-          "selector": ".top-right",
-          "style": {
-            "text-valign": "top",
-            "text-halign": "right"
-          }
-        },
-
-        {
-          "selector": ".center-left",
-          "style": {
-            "text-valign": "center",
-            "text-halign": "left"
-          }
-        },
-
-        {
-          "selector": ".center-center",
-          "style": {
-            "text-valign": "center",
-            "text-halign": "center"
-          }
-        },
-
-        {
-          "selector": ".center-right",
-          "style": {
-            "text-valign": "center",
-            "text-halign": "right"
-          }
-        },
-
-        {
-          "selector": ".bottom-left",
-          "style": {
-            "text-valign": "bottom",
-            "text-halign": "left"
-          }
-        },
-
-        {
-          "selector": ".bottom-center",
-          "style": {
-            "text-valign": "bottom",
-            "text-halign": "center"
-          }
-        },
-
-        {
-          "selector": ".bottom-right",
-          "style": {
-            "text-valign": "bottom",
-            "text-halign": "right"
-          }
-        },
-
-        {
-          "selector": ".multiline-manual",
-          "style": {
-            "text-wrap": "wrap"
-          }
-        },
-
-        {
-          "selector": ".multiline-auto",
-          "style": {
-            "text-wrap": "wrap",
-            "text-max-width": 160
-          }
-        },
-
-        {
-          "selector": ".autorotate",
-          "style": {
-            "edge-text-rotation": "autorotate"
-          }
-        },
-
-        {
-          "selector": ".background",
-          "style": {
-            "text-background-opacity": 1,
-            "color": "#fff",
-            "text-background-color": "#888",
-            "text-background-shape": "roundrectangle",
-            "text-border-color": "#000",
-            "text-border-width": 1,
-            "text-border-opacity": 1
-          }
-        },
-
-        {
-          "selector": ".outline",
-          "style": {
-            "color": "#fff",
-            "text-outline-color": "#888",
-            "text-outline-width": 3
-          }
-        }
-      ],
+      style: fetch('css/cy-style.json').then(function (res) {
+        return res.json();
+      }),
 
       elements: {
         nodes: nodes,
         edges: edges
       }
     });
+
+    cy.ready(onGraphLoaded);
 
     cy.on('tap', 'node', function () {
       let nodes = this;
@@ -299,24 +255,24 @@ var GRAPH = (function(){
 
       commands: [
         {
-          content: '<span class="fa fa-flash fa-2x"></span>',
-          select: function(ele){
-            console.log( ele.id() );
+          content: '<span class="fa fa-flash fa-2x">YouTrack</span>',
+          select: function (ele) {
+            window.open("https://youtrack.jetbrains.com/issue/" + ele.id());
           }
         },
 
         {
-          content: '<span class="fa fa-star fa-2x"></span>',
-          select: function(ele){
-            console.log( ele.data('id') );
+          content: '<span class="fa fa-star fa-2x">Log Info</span>',
+          select: function (ele) {
+            console.log(ele.data());
           },
-          enabled: false
+          enabled: true
         },
 
         {
           content: 'Text',
-          select: function(ele){
-            console.log( ele.position() );
+          select: function (ele) {
+            console.log(ele.position());
           }
         }
       ]
@@ -328,15 +284,15 @@ var GRAPH = (function(){
       commands: [
         {
           content: 'bg1',
-          select: function(){
-            console.log( 'bg1' );
+          select: function () {
+            console.log('bg1');
           }
         },
 
         {
           content: 'bg2',
-          select: function(){
-            console.log( 'bg2' );
+          select: function () {
+            console.log('bg2');
           }
         }
       ]

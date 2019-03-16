@@ -1,0 +1,240 @@
+[
+  {
+    "selector": "edge",
+    "style": {
+      "line-color": "#3FB8E3",
+      "target-arrow-color": "#3FB8E3",
+      "width": 3
+    }
+  },
+  {
+    "selector": "edge.duplicate",
+    "style": {
+      "curve-style": "straight",
+      "line-style": "dashed",
+      "line-color": "#87A4AB",
+      "target-arrow-color": "#87A4AB",
+      "target-arrow-shape": "triangle",
+      "width": 2,
+      "arrow-scale":1
+    }
+  },
+
+  {
+    "selector": "node",
+    "style": {
+      "background-color": "data(color)",
+      "width": "data(width)",
+      "height": "data(height)",
+      "display": "element"
+    }
+  },
+
+  {
+    "selector": "node.resolved",
+    "style": {
+      "background-color": "#749299",
+      "display": "data(display)"
+    }
+  },
+
+
+  {
+    "selector": "node[label]",
+    "style": {
+      "label": "data(label)"
+    }
+  },
+  {
+    "selector": "edge[label]",
+    "style": {
+      "label": "data(label)",
+      "width": 3
+    }
+  },
+  {
+    "selector": ".top-left",
+    "style": {
+      "text-valign": "top",
+      "text-halign": "left"
+    }
+  },
+  {
+    "selector": ".top-center",
+    "style": {
+      "text-valign": "top",
+      "text-halign": "center"
+    }
+  },
+  {
+    "selector": ".top-right",
+    "style": {
+      "text-valign": "top",
+      "text-halign": "right"
+    }
+  },
+  {
+    "selector": ".center-left",
+    "style": {
+      "text-valign": "center",
+      "text-halign": "left"
+    }
+  },
+  {
+    "selector": ".center-center",
+    "style": {
+      "text-valign": "center",
+      "text-halign": "center"
+    }
+  },
+  {
+    "selector": ".center-right",
+    "style": {
+      "text-valign": "center",
+      "text-halign": "right"
+    }
+  },
+  {
+    "selector": ".bottom-left",
+    "style": {
+      "text-valign": "bottom",
+      "text-halign": "left"
+    }
+  },
+  {
+    "selector": ".bottom-center",
+    "style": {
+      "text-valign": "bottom",
+      "text-halign": "center"
+    }
+  },
+  {
+    "selector": ".bottom-right",
+    "style": {
+      "text-valign": "bottom",
+      "text-halign": "right"
+    }
+  },
+  {
+    "selector": ".multiline-manual",
+    "style": {
+      "text-wrap": "wrap"
+    }
+  },
+  {
+    "selector": ".multiline-auto",
+    "style": {
+      "text-wrap": "wrap",
+      "text-max-width": 160
+    }
+  },
+  {
+    "selector": ".autorotate",
+    "style": {
+      "edge-text-rotation": "autorotate"
+    }
+  },
+  {
+    "selector": ".background",
+    "style": {
+      "text-background-opacity": 1,
+      "color": "#fff",
+      "text-background-color": "#888",
+      "text-background-shape": "roundrectangle",
+      "text-border-color": "#000",
+      "text-border-width": 1,
+      "text-border-opacity": 1
+    }
+  },
+  {
+    "selector": ".outline",
+    "style": {
+      "color": "#fff",
+      "text-outline-color": "#888",
+      "text-outline-width": 3
+    }
+  },
+
+
+
+  {
+    "selector": "node[?flipLabel]",
+    "style": {
+      "text-halign": "right"
+    }
+  },
+  {
+    "selector": "edge.bezier",
+    "style": {
+      "curve-style": "bezier",
+      "control-point-step-size": 40
+    }
+  },
+  {
+    "selector": "edge.unbundled-bezier",
+    "style": {
+      "curve-style": "unbundled-bezier",
+      "control-point-distances": 120,
+      "control-point-weights": 0.1
+    }
+  },
+  {
+    "selector": "edge.multi-unbundled-bezier",
+    "style": {
+      "curve-style": "unbundled-bezier",
+      "control-point-distances": [
+        40,
+        -40
+      ],
+      "control-point-weights": [
+        0.250,
+        0.75
+      ]
+    }
+  },
+  {
+    "selector": "edge.haystack",
+    "style": {
+      "curve-style": "haystack",
+      "haystack-radius": 0.5
+    }
+  },
+  {
+    "selector": "edge.segments",
+    "style": {
+      "curve-style": "segments",
+      "segment-distances": [
+        40,
+        -40
+      ],
+      "segment-weights": [
+        0.250,
+        0.75
+      ]
+    }
+  },
+
+
+
+  {
+    "selector": "edge.taxi",
+    "style": {
+      "curve-style": "taxi",
+      "taxi-direction": "downward",
+      "taxi-turn": 20,
+      "taxi-turn-min-distance": 5
+    }
+  },
+  {
+    "selector": "edge[arrow]",
+    "style": {
+      "target-arrow-shape": "data(arrow)"
+    }
+  },
+  {
+    "selector": "edge.hollow",
+    "style": {
+      "target-arrow-fill": "hollow"
+    }
+  }
+]
