@@ -1,27 +1,28 @@
 var GRAPH = (function(){
 
   // http://js.cytoscape.org/#layouts/preset
-  // var layout = {
-  //   name: 'euler',
-  //   randomize: true,
-  //   animate: false,
-  //   springLength: 500
-  // };
 
   var layout = {
-    name: 'breadthfirst',
-    fit: true, // whether to fit the viewport to the graph
-    padding: 30, // padding on fit
-    spacingFactor: 0.5, // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
-    nodeDimensionsIncludeLabels: true, // Excludes the label when calculating node bounding boxes for the layout algorithm
+  name: 'euler',
+      randomize: true,
+      animate: false,
+      springLength: 500
+};
 
-    grid: false, // whether to create an even grid into which the DAG is placed (circle:false only)
-    circle: false, // put depths in concentric circles if true, put depths top down if false
-    avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
-    roots: undefined, // the roots of the trees
-    maximal: true, // whether to shift nodes down their natural BFS depths in order to avoid upwards edges (DAGS only)
-    directed: false, // whether the tree is directed downwards (or edges can point in any direction if false)
-  };
+  // var layout = {
+  //   name: 'breadthfirst',
+  //   fit: true, // whether to fit the viewport to the graph
+  //   padding: 30, // padding on fit
+  //   spacingFactor: 1, // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
+  //   nodeDimensionsIncludeLabels: true, // Excludes the label when calculating node bounding boxes for the layout algorithm
+  //
+  //   grid: false, // whether to create an even grid into which the DAG is placed (circle:false only)
+  //   circle: false, // put depths in concentric circles if true, put depths top down if false
+  //   avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
+  //   roots: undefined, // the roots of the trees
+  //   maximal: true, // whether to shift nodes down their natural BFS depths in order to avoid upwards edges (DAGS only)
+  //   directed: false, // whether the tree is directed downwards (or edges can point in any direction if false)
+  // };
 
   function render(issuesList) {
     let nodes = [], edges = [];
@@ -291,6 +292,54 @@ var GRAPH = (function(){
           delay += duration;
         })();
       }
+    });
+
+    cy.cxtmenu({
+      selector: 'node, edge',
+
+      commands: [
+        {
+          content: '<span class="fa fa-flash fa-2x"></span>',
+          select: function(ele){
+            console.log( ele.id() );
+          }
+        },
+
+        {
+          content: '<span class="fa fa-star fa-2x"></span>',
+          select: function(ele){
+            console.log( ele.data('id') );
+          },
+          enabled: false
+        },
+
+        {
+          content: 'Text',
+          select: function(ele){
+            console.log( ele.position() );
+          }
+        }
+      ]
+    });
+
+    cy.cxtmenu({
+      selector: 'core',
+
+      commands: [
+        {
+          content: 'bg1',
+          select: function(){
+            console.log( 'bg1' );
+          }
+        },
+
+        {
+          content: 'bg2',
+          select: function(){
+            console.log( 'bg2' );
+          }
+        }
+      ]
     });
 
   }
