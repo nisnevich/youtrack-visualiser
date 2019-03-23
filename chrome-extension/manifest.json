@@ -5,7 +5,8 @@
   "permissions": ["activeTab", "declarativeContent", "storage"],
   "options_page": "options.html",
   "background": {
-    "scripts": ["background.js", "application/js/youtrack.js"],
+    "page": "background.html",
+    "scripts": ["application/js/settings.js", "background.js"],
     "persistent": false
   },
   "browser_action": {

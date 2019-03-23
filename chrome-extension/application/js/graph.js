@@ -1,41 +1,10 @@
 var Graph = (function () {
 
+  // todo optimise http://js.cytoscape.org/#performance/optimisations
+
   // http://js.cytoscape.org/#layouts/preset
-  
-  let options = {
-    layout: Settings.layoutType.cose,
-  };
 
-  document.onkeyup = function (e) {
-    if (e.code === "KeyD") {
-      hideResolved();
-      cy.layout(options.layout).run();
-    }
-  };
-
-  function hideResolved() {
-    let activeNodes = [];
-    cy.nodes().forEach(function (node) {
-      if (node.data().issueData.resolved) {
-        let isDisplayed = node.data("display");
-        node.data("display", isDisplayed === "none" ? "element" : "none");
-      } else {
-        activeNodes.push(node);
-      }
-    });
-    setTimeout( function() {
-      cy.fit(cy.$("node[display = 'element']"), 30);
-    }, 100);
-  }
-
-  function onGraphLoaded() {
-    // TODO make nodes hidden by default
-    // if (!Settings.renderClosedIssues()) {
-    //   hideResolved();
-    // }
-  }
-
-  function render(issuesList) {
+  function render(issuesList, options) {
     let nodes = [], edges = [];
     for (let key in issuesList) {
       let issue = issuesList[key];
@@ -45,6 +14,7 @@ var Graph = (function () {
           label: issue.summary,
           name: issue.project.shortName + '-' + issue.numberInProject,
           id: issue.id,
+          depthLevel: issue.depthLevel,
           issueData: issue,
           display: "element"
         },
@@ -147,6 +117,10 @@ var Graph = (function () {
           node.data.color = colors[nodeSize - Settings.defaults.maxNodeSize + Settings.defaults.minNodeSize];
           console.log(nodeSize - Settings.defaults.maxNodeSize + Settings.defaults.minNodeSize);
         }
+
+        if (node.data.id === options.rootId) {
+          node.classes += " central";
+        }
       }
 
       for (let edge of edges) {
@@ -155,6 +129,7 @@ var Graph = (function () {
         switch (edge.data.linkType.name) {
           default:
             console.log("Unknown link type: " + name);
+            // TODO link types
           case "Relates":
           case "Folllowed":
           case "Reused in":
@@ -191,67 +166,76 @@ var Graph = (function () {
       elements: {
         nodes: nodes,
         edges: edges
-      }
+      },
+      boxSelectionEnabled: true,
+      // enable if performance needed:
+      hideEdgesOnViewport: false,
+      textureOnViewport: false,
+      motionBlur: false,
+      motionBlurOpacity: 0.5,
     });
 
-    cy.ready(onGraphLoaded);
+    // TODO make nodes hidden by default
+    // cy.ready(onGraphLoaded);
 
-    cy.on('tap', 'node', function () {
-      let nodes = this;
-      let tapped = nodes;
-      let food = [];
-
-      nodes.addClass('eater');
-
-      for (; ;) {
-        let connectedEdges = nodes.connectedEdges(function (el) {
-          return !el.target().anySame(nodes);
-        });
-
-        let connectedNodes = connectedEdges.targets();
-
-        Array.prototype.push.apply(food, connectedNodes);
-
-        nodes = connectedNodes;
-
-        if (nodes.empty()) {
-          break;
-        }
-      }
-
-      let delay = 0;
-      let duration = 500;
-      for (let i = food.length - 1; i >= 0; i--) {
-        (function () {
-          let thisFood = food[i];
-          let eater = thisFood.connectedEdges(function (el) {
-            return el.target().same(thisFood);
-          }).source();
-
-          thisFood.delay(delay, function () {
-            eater.addClass('eating');
-          }).animate({
-            position: eater.position(),
-            css: {
-              'width': 10,
-              'height': 10,
-              'border-width': 0,
-              'opacity': 0
-            }
-          }, {
-            duration: duration,
-            complete: function () {
-              thisFood.remove();
-            }
-          });
-
-          delay += duration;
-        })();
-      }
-    });
+    // cy.on('tap', 'node', function () {
+    //   let nodes = this;
+    //   let basicDepth = this.data.depthLevel;
+    //
+    //   let tapped = nodes;
+    //   let food = [];
+    //
+    //   nodes.addClass('eater');
+    //
+    //   for (; ;) {
+    //     let connectedEdges = nodes.connectedEdges(function (el) {
+    //       return !el.target().anySame(nodes);
+    //     });
+    //
+    //     let connectedNodes = connectedEdges.targets('node[depthLevel=]');
+    //
+    //     Array.prototype.push.apply(food, connectedNodes);
+    //
+    //     nodes = connectedNodes;
+    //
+    //     if (nodes.empty()) {
+    //       break;
+    //     }
+    //   }
+    //
+    //   let delay = 0;
+    //   let duration = 500;
+    //   for (let i = food.length - 1; i >= 0; i--) {
+    //     (function () {
+    //       let thisFood = food[i];
+    //       let eater = thisFood.connectedEdges(function (el) {
+    //         return el.target().same(thisFood);
+    //       }).source();
+    //
+    //       thisFood.delay(delay, function () {
+    //         eater.addClass('eating');
+    //       }).animate({
+    //         position: eater.position(),
+    //         css: {
+    //           'width': 10,
+    //           'height': 10,
+    //           'border-width': 0,
+    //           'opacity': 0
+    //         }
+    //       }, {
+    //         duration: duration,
+    //         complete: function () {
+    //           thisFood.remove();
+    //         }
+    //       });
+    //
+    //       delay += duration;
+    //     })();
+    //   }
+    // });
 
     cy.cxtmenu({
-      selector: 'node, edge',
+      selector: 'node, node[label]',
 
       commands: [
         {

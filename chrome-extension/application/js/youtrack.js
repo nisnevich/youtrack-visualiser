@@ -34,6 +34,7 @@ var YouTrack = (function () {
         }
       },
       success: function (issue) {
+        issue.depthLevel = depth;
         resultsList.push(issue);
 
         if (depth === maxDepthLevel) {
