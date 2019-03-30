@@ -12,6 +12,7 @@ var Settings = (function(){
 
       minNodeSize: 30,
       maxNodeSize: 60,
+      sidebarRelativeSize: 0.3,
       // colorMin: "#4298CC",
       // colorMax: "#5C38D4",
       colorMin: "rgb(66,152,204)", // #4298CC

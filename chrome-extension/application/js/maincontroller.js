@@ -1,7 +1,11 @@
 var Main = (function () {
 
   let $dom = {
-    sidebar: $(".sidebar"),
+    sidebar: {
+      panel: $(".sidebar"),
+      content: $(".sidebar > .content"),
+      resizer: $(".sidebar > .resizer")
+    },
     sidebarTemplate: $("#sidebar-template"),
     graphContainer: $("#graph")
   };
@@ -9,11 +13,6 @@ var Main = (function () {
   let options = {
     layout: Settings.layoutType.cose,
   };
-
-  // fixme
-  $dom.sidebar.resizable({
-    handles: 'e'
-  });
 
   let keyDown = {
     leftShift: false
@@ -44,15 +43,32 @@ var Main = (function () {
   }
 
   function showSidePanel(issueData) {
-    if (!Main.$dom.sidebar.data("visible")) {
-      Main.$dom.sidebar.data("visible", true);
-      Main.$dom.sidebar.toggle("slide");
+    if (!Main.$dom.sidebar.panel.data("visible")) {
+      Main.$dom.sidebar.panel.data("visible", true);
+      Main.$dom.sidebar.panel.toggle("slide");
     }
 
-    Main.$dom.sidebar.html(sidebarTemplate(issueData));
-    Main.$dom.sidebar.removeClass("resolved unresolved");
-    Main.$dom.sidebar.addClass(issueData.field.resolved ? "resolved" : "unresolved");
+    Main.$dom.sidebar.content.html(sidebarTemplate(issueData));
+    Main.$dom.sidebar.panel.removeClass("resolved unresolved");
+    Main.$dom.sidebar.panel.addClass(issueData.field.resolved ? "resolved" : "unresolved");
   }
+
+  function resize(e) {
+    let left = $dom.sidebar.panel.get(0).getBoundingClientRect().left;
+    $dom.sidebar.panel.css("width", e.pageX - left + 'px');
+    $("body").css("cursor", "col-resize");
+  }
+
+  function stopResize() {
+    window.removeEventListener('mousemove', resize);
+    $("body").css("cursor", "auto");
+  }
+
+  $dom.sidebar.resizer.mousedown(function(e) {
+    e.preventDefault();
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResize);
+  });
 
   let sidebarTemplate = Handlebars.compile($dom.sidebarTemplate.html());
   let tappedBefore, tappedTimeout;
@@ -94,13 +110,13 @@ var Main = (function () {
           }
           if (keyDown.leftShift && e.code === "Tab" || e.code === "Escape") {
             // todo implement nodes history
-            // if ($dom.sidebar.data("visible")) {
+            // if ($dom.sidebar.panel.data("visible")) {
             //   Graph.node.unselect(selectedNode);
             // } else {
             //   Graph.node.select(selectedNode);
             // }
-            $dom.sidebar.data("visible", !$dom.sidebar.data("visible"));
-            $dom.sidebar.toggle("slide");
+            $dom.sidebar.panel.data("visible", !$dom.sidebar.panel.data("visible"));
+            $dom.sidebar.panel.toggle("slide");
           }
         }
       },
@@ -116,9 +132,9 @@ var Main = (function () {
 
             showSidePanel(target.data().issueData);
           } else {
-            if ($dom.sidebar.data("visible")) {
-              $dom.sidebar.data("visible", false);
-              $dom.sidebar.toggle("slide");
+            if ($dom.sidebar.panel.data("visible")) {
+              $dom.sidebar.panel.data("visible", false);
+              $dom.sidebar.panel.toggle("slide");
             }
           }
           // double tab event is missing in default set

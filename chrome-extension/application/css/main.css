@@ -31,7 +31,6 @@ a:active {
   min-width: 200px;
   max-width: 50%;
   width: 30%;
-  border-right: black 1px solid;
   background: rgba(11, 46, 19, 0.5);
   color: white;
 
@@ -41,6 +40,16 @@ a:active {
   top: 0;
   left: 0;
   height: 100%;
+}
+.sidebar > .resizer {
+  opacity: 0.3;
+  cursor: col-resize;
+  position: absolute;
+  width: 10px;
+  height: 100%;
+  bottom: 0;
+  right: 0;
+  top: 0;
 }
 
 .sidebar.resolved {
