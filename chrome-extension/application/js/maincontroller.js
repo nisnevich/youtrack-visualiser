@@ -15,7 +15,10 @@ var Main = (function () {
   };
 
   let keyDown = {
-    leftShift: false
+    shiftLeft: false,
+    ctrlLeft: false,
+    altLeft: false,
+    metaLeft: false,
   };
 
   function loadIssues(rootId, depth) {
@@ -44,13 +47,17 @@ var Main = (function () {
 
   function showSidePanel(issueData) {
     if (!Main.$dom.sidebar.panel.data("visible")) {
-      Main.$dom.sidebar.panel.data("visible", true);
-      Main.$dom.sidebar.panel.toggle("slide");
+      toggleSidePanel();
     }
 
     Main.$dom.sidebar.content.html(sidebarTemplate(issueData));
     Main.$dom.sidebar.panel.removeClass("resolved unresolved");
     Main.$dom.sidebar.panel.addClass(issueData.field.resolved ? "resolved" : "unresolved");
+  }
+
+  function toggleSidePanel() {
+    $dom.sidebar.panel.data("visible", !$dom.sidebar.panel.data("visible"));
+    $dom.sidebar.panel.toggle("slide");
   }
 
   function resize(e) {
@@ -71,6 +78,7 @@ var Main = (function () {
   });
 
   let sidebarTemplate = Handlebars.compile($dom.sidebarTemplate.html());
+  let windowKeyListener = new window.keypress.Listener();
   let tappedBefore, tappedTimeout;
   let selectedNode = null;
 
@@ -79,44 +87,56 @@ var Main = (function () {
     loadIssues(Settings.getRootIssueId(), depthLevel ? depthLevel : 1);
   });
 
+  // doc: http://dmauro.github.io/Keypress/
+  // key names: https://github.com/dmauro/Keypress/blob/master/keypress.coffee#L757-864
+  windowKeyListener.register_many([{
+      "keys": "alt r",
+      "is_exclusive": true,
+      "prevent_default": true,
+      "on_keyup": function (event) {
+        toggleResolvedVisibility();
+        cy.layout(options.layout).run();
+      }
+    },
+    {
+      "keys": "space",
+      "is_exclusive": true,
+      "prevent_default": true,
+      "on_keyup": function (event) {
+        // todo select last when history implemented
+        if (selectedNode) {
+          Graph.node.center(selectedNode);
+          showSidePanel(selectedNode.data().issueData);
+        }
+      }
+    },
+    {
+      "keys": "escape",
+      "is_exclusive": true,
+      "prevent_default": true,
+      "on_keyup": function (event) {
+        toggleSidePanel();
+      }
+    },
+    {
+      "keys": "shift tab",
+      "is_exclusive": true,
+      "prevent_default": true,
+      "on_keyup": function (event) {
+        toggleSidePanel();
+      }
+    }
+  ]);
+
   return {
     $dom: $dom,
     bindings: {
       document: {
         onkeyup: function (e) {
-          if (e.code === "KeyD") {
-            toggleResolvedVisibility();
-            cy.layout(options.layout).run();
-          }
           if (e.code.startsWith("Digit")) {
             let depthLevel = parseInt(e.code.replace(/\D/g, ''));
             window.location.hash = depthLevel;
             loadIssues(Settings.getRootIssueId(), depthLevel);
-          }
-          if (e.code === "Space") {
-            // todo select last when history implemented
-            if (selectedNode) {
-              Graph.node.center(selectedNode);
-              showSidePanel(selectedNode.data().issueData);
-            }
-          }
-          if (e.code === "ShiftLeft") {
-            keyDown.leftShift = false;
-          }
-        },
-        onkeydown: function(e) {
-          if (e.code === "ShiftLeft") {
-            keyDown.leftShift = true;
-          }
-          if (keyDown.leftShift && e.code === "Tab" || e.code === "Escape") {
-            // todo implement nodes history
-            // if ($dom.sidebar.panel.data("visible")) {
-            //   Graph.node.unselect(selectedNode);
-            // } else {
-            //   Graph.node.select(selectedNode);
-            // }
-            $dom.sidebar.panel.data("visible", !$dom.sidebar.panel.data("visible"));
-            $dom.sidebar.panel.toggle("slide");
           }
         }
       },

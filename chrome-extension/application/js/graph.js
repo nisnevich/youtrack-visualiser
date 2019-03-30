@@ -162,14 +162,9 @@ var Graph = (function () {
       motionBlurOpacity: 0.5,
     });
 
-    // TODO make nodes hidden by default
-    // cy.ready(function(){});
-
-
     cy.on('tap', Main.bindings.cy.tap);
     cy.on('doubleTap', Main.bindings.cy.doubleTap);
     document.onkeyup = Main.bindings.document.onkeyup;
-    document.onkeydown = Main.bindings.document.onkeydown;
 
     // cy.on('tap', 'node', function () {
     //   let nodes = this;
