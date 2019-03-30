@@ -8,23 +8,24 @@ var Settings = (function(){
 
   return {
     defaults: {
-      padding: 30,
-
       minNodeSize: 30,
       maxNodeSize: 60,
       sidebarRelativeSize: 0.3,
-      // colorMin: "#4298CC",
-      // colorMax: "#5C38D4",
       colorMin: "rgb(66,152,204)", // #4298CC
-      colorMax: "rgb(62,121,227)",
+      colorMax: "rgb(62,121,227)", // #5C38D4
       maxVotesMatter: 100,
 
       doubleClickTimeout: 600,
+      scrollOffset: {
+        usual: 50,
+        fast: 500
+      },
+      resizeOffset: 20,
 
       animation: {
         center: {
           duration: 500,
-          easing: "ease-out-expo",
+          easing: "ease-out-expo", // http://js.cytoscape.org/#style/transition-animation
           zoom: 0.8
         }
       }
