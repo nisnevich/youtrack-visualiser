@@ -3,7 +3,7 @@ var Settings = (function(){
 
   let keys = {
     renderResolved: "renderResolved",
-    rootIssueId: "rootIssueId"
+    rootIssueId: "rootIssueId",
   };
 
   return {
@@ -16,7 +16,17 @@ var Settings = (function(){
       // colorMax: "#5C38D4",
       colorMin: "rgb(66,152,204)", // #4298CC
       colorMax: "rgb(62,121,227)",
-      maxVotesMatter: 100
+      maxVotesMatter: 100,
+
+      doubleClickTimeout: 600,
+
+      animation: {
+        center: {
+          duration: 500,
+          easing: "ease-out-expo",
+          zoom: 0.8
+        }
+      }
     },
     getRootIssueId: function(){
       return localStorage[keys.rootIssueId];

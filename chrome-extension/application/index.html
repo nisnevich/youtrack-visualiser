@@ -5,22 +5,68 @@
   <meta content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" name="viewport">
   <title>Graph Visualisation</title>
 
+  <link href="lib/bootstrap.min.css" rel="stylesheet"/>
+  <link href="lib/jquery-ui/jquery-ui.min.css" rel="stylesheet"/>
+  <link href="lib/page-loader.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-  <div id="graph"></div>
+<div class="sidebar"></div>
 
-  <script src="lib/pace.min.js"></script>
-  <script src="lib/jquery-3.3.1.min.js"></script>
-  <script src="lib/cytoscape.min.js"></script>
-  <script src="lib/cytoscape-euler.js"></script>
-  <script src="lib/cytoscape-cxtmenu.js"></script>
+<div id="graph"></div>
 
-  <script src="js/settings.js"></script>
-  <script src="js/youtrack.js"></script>
-  <script src="js/graph.js"></script>
-  <script src="js/maincontroller.js"></script>
+<script id="sidebar-template" type="text/x-handlebars-template">
+  <div class="container">
+    <div class="row top7">
+      <div class="col">
+        <div class="issue-tags">
+          {{#each tag}}
+          <div class="issue-tag">{{value}}</div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+    <div class="row top10">
+      <div class="col">
+        <a class="issue-id" href="https://youtrack.jetbrains.com/issue/{{id}}" target="_blank">
+          {{id}}
+        </a>
+      </div>
+      <div class="col">
+        <div class="issue-created-by">
 
-  <link rel="stylesheet" href="lib/page-loader.css">
-  <link href="css/main.css" rel="stylesheet" type="text/css"/>
+        </div>
+      </div>
+    </div>
+    <div class="row top15">
+      <div class="col">
+        <div class="issue-title">
+          {{field.summary.value}}
+        </div>
+      </div>
+    </div>
+    <div class="row top20">
+      <div class="col">
+        <div class="issue-description">
+          {{{field.description.value}}}
+        </div>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script src="lib/pace.min.js"></script>
+<!--<script src="lib/bootstrap.min.js"></script>-->
+<script src="lib/jquery-3.3.1.min.js"></script>
+<script src="lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="lib/cytoscape.min.js"></script>
+<script src="lib/cytoscape-euler.js"></script>
+<script src="lib/cytoscape-cxtmenu.js"></script>
+<script src="lib/handlebars-v4.1.1.js"></script>
+
+<script src="js/settings.js"></script>
+<script src="js/youtrack.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/maincontroller.js"></script>
 </body>
 </html>

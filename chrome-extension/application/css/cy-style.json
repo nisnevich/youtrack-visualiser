@@ -24,8 +24,26 @@
   {
     "selector": "node.central",
     "style": {
+      "shape": "star",
       "border-width": 3,
-      "border-color": "purple"
+      "border-color": "#CF4E4E",
+      "opacity": 0.75
+    }
+  },
+  {
+    "selector": "node.selected",
+    "style": {
+      "border-color": "#1B4D7F",
+      "border-width": 2,
+      "opacity": 0.9
+    }
+  },
+  {
+    "selector": "node.resolved.selected",
+    "style": {
+      "border-color": "#32484C",
+      "border-width": 2,
+      "opacity": 0.75
     }
   },
   {

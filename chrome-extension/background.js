@@ -14,8 +14,7 @@ chrome.browserAction.onClicked.addListener(function (tab) {
       alert("Unable to fetch issue ID.");
       return;
     }
-    // TODO set in a proper way - add Settings dependency
-    localStorage["rootIssueId"] = matches[1];
+    Settings.setRootIssueId(matches[1]);
     window.open("application/index.html");
   });
 });

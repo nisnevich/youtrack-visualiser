@@ -21,7 +21,8 @@ var YouTrack = (function () {
 
   function loadIssuesInternal(rootIssueId, callback, depth) {
     let getUrl = function (rootIssueId) {
-      return `https://youtrack.jetbrains.com/api/issues/${rootIssueId}?fields=id,project(shortName),numberInProject,summary,wikifiedDescription,resolved,fields(projectCustomField(field(name)),value(name)),links(direction,linkType(name,directed,sourceToTarget,targetToSource),issues(id,project(shortName),numberInProject)),votes,tags(name),attachments(id)`;
+      // return `https://youtrack.jetbrains.com/api/issues/${rootIssueId}?fields=id,project(shortName),numberInProject,summary,wikifiedDescription,resolved,fields(projectCustomField(field(name)),value(name)),links(direction,linkType(name,directed,sourceToTarget,targetToSource),issues(id,project(shortName),numberInProject)),votes,tags(name),attachments(id)`;
+      return `https://youtrack.jetbrains.com/rest/issue/${rootIssueId}?wikifyDescription=true`;
     };
 
     let deferred = $.ajax({
@@ -37,21 +38,22 @@ var YouTrack = (function () {
         issue.depthLevel = depth;
         resultsList.push(issue);
 
+        // youtrack returns fields as list
+        let fieldsList = issue.field;
+        issue.field = {};
+        for (let field of fieldsList) {
+          issue.field[field.name] = field;
+        }
         if (depth === maxDepthLevel) {
           return;
         }
-        for (let key in issue.links) {
-          let issueLink = issue.links[key];
-          for (let key in issueLink.issues) {
-            let lIssue = issueLink.issues[key];
-            let linkedIssueId = lIssue.project.shortName + '-' + lIssue.numberInProject;
-            if (visitedIssueIds.indexOf(linkedIssueId) > -1) {
-              continue;
-            }
-            issuesToVisitCounter++;
-            visitedIssueIds.push(rootIssueId);
-            loadIssuesInternal(linkedIssueId, callback, 1 + depth);
+        for (let issueLink of issue.field.links.value) {
+          if (visitedIssueIds.indexOf(issueLink.value) > -1) {
+            continue;
           }
+          issuesToVisitCounter++;
+          visitedIssueIds.push(rootIssueId);
+          loadIssuesInternal(issueLink.value, callback, 1 + depth);
         }
       },
       error: function (xhr, status, object) {
@@ -60,18 +62,271 @@ var YouTrack = (function () {
       },
       complete: function () {
         issuesToVisitCounter--;
-      }
-    });
-
-    $.when(deferred).done(function(){
-      if (issuesToVisitCounter === 0) {
-        localStorage["nodesAmount"] = resultsList.length;
-        callback(resultsList);
+        if (issuesToVisitCounter === 0) {
+          localStorage["nodesAmount"] = resultsList.length;
+          callback(resultsList);
+        }
       }
     });
   }
 
   let testObject = {
+    "id": "IDEA-84051",
+    "entityId": "25-398271",
+    "jiraId": null,
+    "field": [
+      {
+        "name": "projectShortName",
+        "value": "IDEA"
+      },
+      {
+        "name": "summary",
+        "value": "Tab management usability issues"
+      },
+      {
+        "name": "reporterFullName",
+        "value": "Vlad"
+      },
+      {
+        "name": "created",
+        "value": "1333527885180"
+      },
+      {
+        "name": "numberInProject",
+        "value": "84051"
+      },
+      {
+        "name": "description",
+        "value": "<div class=\"wiki text prewrapped\">The standart of tab management would be Google Chrome i think, so you may want to use it as example.<br/><br/>1. When the tab is in the draggable state (the mouse button is not released), when i hover over a tab bar, i should see a preview where the tab will be placed.<br/>2. The tab is detached only by dragging up/down, also should detach on right/left. When it is dragged r/l inside the tab bar bounds - it changes position, outside - the tab detaches from the tab bar.<br/>3. When the split view has only <strong>one tab</strong>, and it is detached, you can&#39;t return the tab to that split view, when i release the mouse button, to return the tab, it goes to the main window, and the split view closes.<br/>4. The tabs detached from the tab bar can be placed only at the end when attached back.</div>\n"
+      },
+      {
+        "name": "updaterFullName",
+        "value": "Elena Pogorelova"
+      },
+      {
+        "name": "reporterName",
+        "value": "Vlad.Vladovi4.Vladov"
+      },
+      {
+        "name": "commentsCount",
+        "value": "4"
+      },
+      {
+        "name": "updaterName",
+        "value": "lena"
+      },
+      {
+        "name": "markdown",
+        "value": "false"
+      },
+      {
+        "name": "wikified",
+        "value": "true"
+      },
+      {
+        "name": "votes",
+        "value": "2"
+      },
+      {
+        "name": "updated",
+        "value": "1549654085597"
+      },
+      {
+        "name": "links",
+        "value": [
+          {
+            "value": "IDEA-75436",
+            "type": "Relates",
+            "role": "relates to"
+          },
+          {
+            "value": "IDEA-84887",
+            "type": "Relates",
+            "role": "relates to"
+          },
+          {
+            "value": "IDEA-107376",
+            "type": "Relates",
+            "role": "relates to"
+          },
+          {
+            "value": "IDEA-182462",
+            "type": "Relates",
+            "role": "relates to"
+          },
+          {
+            "value": "IDEA-205291",
+            "type": "Relates",
+            "role": "relates to"
+          },
+          {
+            "value": "IDEA-206974",
+            "type": "Relates",
+            "role": "relates to"
+          }
+        ]
+      },
+      {
+        "name": "Type",
+        "value": [
+          "Usability Problem"
+        ],
+        "valueId": [
+          "Usability Problem"
+        ],
+        "color": null
+      },
+      {
+        "name": "Priority",
+        "value": [
+          "Major"
+        ],
+        "valueId": [
+          "Major"
+        ],
+        "color": {
+          "bg": "#ffee9c",
+          "fg": "#b45f06"
+        }
+      },
+      {
+        "name": "State",
+        "value": [
+          "Submitted"
+        ],
+        "valueId": [
+          "Submitted"
+        ],
+        "color": null
+      },
+      {
+        "name": "Subsystem",
+        "value": [
+          "User Interface"
+        ],
+        "valueId": [
+          "User Interface"
+        ],
+        "color": null
+      },
+      {
+        "name": "Verified",
+        "value": [
+          "No"
+        ],
+        "valueId": [
+          "No"
+        ],
+        "color": null
+      },
+      {
+        "name": "Triaged",
+        "value": [
+          "Yes"
+        ],
+        "valueId": [
+          "Yes"
+        ],
+        "color": null
+      },
+      {
+        "name": "Assignee",
+        "value": [
+          {
+            "value": "Vassiliy.Kudryashov",
+            "fullName": "Vassiliy Kudryashov"
+          }
+        ]
+      },
+      {
+        "name": "voterName",
+        "value": [
+          {
+            "value": "Kirill.Likhodedov",
+            "fullName": "Kirill Likhodedov"
+          },
+          {
+            "value": "axel.costas.pena",
+            "fullName": "Áxel Costas Pena"
+          }
+        ]
+      }
+    ],
+    "comment": [
+      {
+        "id": "27-316010",
+        "author": "Vlad.Vladovi4.Vladov",
+        "authorFullName": "Vlad",
+        "issueId": "IDEA-84051",
+        "parentId": null,
+        "deleted": false,
+        "jiraId": null,
+        "text": "<div class=\"wiki text prewrapped\">Also how to change focus from one split view to another via a keyboard shortcut? Ctrl+Tab switches between tabs, not split views.</div>\n",
+        "shownForIssueAuthor": false,
+        "created": 1333528104286,
+        "updated": 0,
+        "permittedGroup": null,
+        "markdown": false,
+        "replies": []
+      },
+      {
+        "id": "27-316036",
+        "author": "LazyOne",
+        "authorFullName": "Andriy Bazanov",
+        "issueId": "IDEA-84051",
+        "parentId": null,
+        "deleted": false,
+        "jiraId": null,
+        "text": "<div class=\"wiki text prewrapped\"><a href=\"https://youtrack.jetbrains.com:443/users/Random\" title=\"Random\" data-user-id=\"11-51904\">Alexej Barzykin</a> Stuff <br/>Windows | Editor Tabs | Goto Next Splitter<br/>Windows | Editor Tabs | Goto Previous Splitter</div>\n",
+        "shownForIssueAuthor": false,
+        "created": 1333530776973,
+        "updated": 0,
+        "permittedGroup": null,
+        "markdown": false,
+        "replies": []
+      },
+      {
+        "id": "27-316057",
+        "author": "Vlad.Vladovi4.Vladov",
+        "authorFullName": "Vlad",
+        "issueId": "IDEA-84051",
+        "parentId": null,
+        "deleted": false,
+        "jiraId": null,
+        "text": "<div class=\"wiki text prewrapped\">Windows | Editor Tabs | Goto Next Splitter actually is the shortcut i said, Ctrl+tab, i just should have release the button quicker.  thanks :)</div>\n",
+        "shownForIssueAuthor": false,
+        "created": 1333532190162,
+        "updated": 0,
+        "permittedGroup": null,
+        "markdown": false,
+        "replies": []
+      },
+      {
+        "id": "27-763274",
+        "author": "Olga.Berdnikova",
+        "authorFullName": "Olga Berdnikova",
+        "issueId": "IDEA-84051",
+        "parentId": null,
+        "deleted": false,
+        "jiraId": null,
+        "text": "<div class=\"wiki text prewrapped\">Agree with all points here.</div>\n",
+        "shownForIssueAuthor": false,
+        "created": 1404740708561,
+        "updated": 0,
+        "permittedGroup": "idea-developers",
+        "markdown": false,
+        "replies": []
+      }
+    ],
+    "tag": [
+      {
+        "value": "link-visualiser-todo",
+        "cssClass": "c0"
+      }
+    ]
+  };
+
+  let testObject2 = {
     "numberInProject": 106716,
     "project": {
       "shortName": "IDEA",
@@ -722,378 +977,6 @@ var YouTrack = (function () {
     "$type": "jetbrains.charisma.persistent.Issue"
   };
 
-  let testObject2 = {
-    "numberInProject": 74903,
-    "project": {
-      "shortName": "IDEA",
-      "$type": "jetbrains.charisma.persistent.Project"
-    },
-    "tags": [
-      {
-        "name": "reply needed",
-        "$type": "jetbrains.charisma.persistent.issueFolders.IssueTag"
-      },
-      {
-        "name": "linux",
-        "$type": "jetbrains.charisma.persistent.issueFolders.IssueTag"
-      }
-    ],
-    "votes": 21,
-    "summary": "focus stealing issue when switching between IDEA project windows",
-    "attachments": [
-      {
-        "id": "74-160714",
-        "$type": "jetbrains.charisma.persistent.issue.IssueAttachment"
-      },
-      {
-        "id": "74-160715",
-        "$type": "jetbrains.charisma.persistent.issue.IssueAttachment"
-      }
-    ],
-    "links": [
-      {
-        "linkType": {
-          "directed": false,
-          "targetToSource": "relates to",
-          "sourceToTarget": "relates to",
-          "name": "Relates",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [
-          {
-            "id": "25-550457",
-            "$type": "jetbrains.charisma.persistent.Issue"
-          },
-          {
-            "id": "25-1419672",
-            "$type": "jetbrains.charisma.persistent.Issue"
-          }
-        ],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "depends on",
-          "sourceToTarget": "is required for",
-          "name": "Depend",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "depends on",
-          "sourceToTarget": "is required for",
-          "name": "Depend",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "duplicates",
-          "sourceToTarget": "is duplicated by",
-          "name": "Duplicate",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [
-          {
-            "id": "25-662233",
-            "$type": "jetbrains.charisma.persistent.Issue"
-          },
-          {
-            "id": "25-677241",
-            "$type": "jetbrains.charisma.persistent.Issue"
-          }
-        ],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "duplicates",
-          "sourceToTarget": "is duplicated by",
-          "name": "Duplicate",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "subtask of",
-          "sourceToTarget": "parent for",
-          "name": "Subtask",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "subtask of",
-          "sourceToTarget": "parent for",
-          "name": "Subtask",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "previous step",
-          "sourceToTarget": "next step",
-          "name": "Folllowed",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "previous step",
-          "sourceToTarget": "next step",
-          "name": "Folllowed",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": false,
-          "targetToSource": "similar to",
-          "sourceToTarget": "similar to",
-          "name": "Similar",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": false,
-          "targetToSource": "Reused in",
-          "sourceToTarget": "Reused in",
-          "name": "Reuse",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "also fixes",
-          "sourceToTarget": "fixed by",
-          "name": "Cause",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "also fixes",
-          "sourceToTarget": "fixed by",
-          "name": "Cause",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "caused by",
-          "sourceToTarget": "leads to",
-          "name": "Leads to",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      },
-      {
-        "linkType": {
-          "directed": true,
-          "targetToSource": "caused by",
-          "sourceToTarget": "leads to",
-          "name": "Leads to",
-          "$type": "jetbrains.charisma.persistent.link.IssueLinkType"
-        },
-        "issues": [],
-        "$type": "jetbrains.charisma.persistent.link.IssueLink"
-      }
-    ],
-    "wikifiedDescription": "<div class=\"wiki text prewrapped\">I have multiple IDEA project windows that I want to switch between. About 80% of the time the window I switch to has its focus stolen by the previously focused IDEA project window. This doesn&#39;t happen if I switch to a non-IDEA window first.<br/><br/>This happens using both the Static Application Switcher and the Scale plugins on Ubuntu natty, Compiz 0.9.4 with the Java Window fix workaround that keeps IDEA windows from disappearing from the taskbar. Experimenting with different Compiz focus prevention levels makes no difference.</div>\n",
-    "fields": [
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Priority",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumProjectCustomField"
-        },
-        "value": {
-          "name": "Normal",
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumBundleElement"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.enumeration.SingleEnumIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Type",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumProjectCustomField"
-        },
-        "value": {
-          "name": "Bug",
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumBundleElement"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.enumeration.SingleEnumIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "State",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.state.StateProjectCustomField"
-        },
-        "value": {
-          "name": "Submitted",
-          "$type": "jetbrains.charisma.customfields.complex.state.StateBundleElement"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.state.StateIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Assignee",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.user.UserProjectCustomField"
-        },
-        "value": {
-          "name": "Denis Fokin",
-          "$type": "jetbrains.charisma.persistence.user.User"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.user.SingleUserIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Subsystem",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.ownedField.OwnedProjectCustomField"
-        },
-        "value": {
-          "name": "User Interface. Focus",
-          "$type": "jetbrains.charisma.customfields.complex.ownedField.OwnedBundleElement"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.ownedField.SingleOwnedIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Fixed in builds",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.build.BuildProjectCustomField"
-        },
-        "value": [],
-        "$type": "jetbrains.charisma.customfields.complex.build.MultiBuildIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Fix versions",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.version.VersionProjectCustomField"
-        },
-        "value": [],
-        "$type": "jetbrains.charisma.customfields.complex.version.MultiVersionIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Affected versions",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.version.VersionProjectCustomField"
-        },
-        "value": [],
-        "$type": "jetbrains.charisma.customfields.complex.version.MultiVersionIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Spent time",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.youtrack.timetracking.periodField.PeriodProjectCustomField"
-        },
-        "value": null,
-        "$type": "jetbrains.youtrack.timetracking.periodField.PeriodIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Tester",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.user.UserProjectCustomField"
-        },
-        "value": null,
-        "$type": "jetbrains.charisma.customfields.complex.user.SingleUserIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Verified",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumProjectCustomField"
-        },
-        "value": {
-          "name": "No",
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumBundleElement"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.enumeration.SingleEnumIssueCustomField"
-      },
-      {
-        "projectCustomField": {
-          "field": {
-            "name": "Triaged",
-            "$type": "jetbrains.charisma.customfields.rest.CustomField"
-          },
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumProjectCustomField"
-        },
-        "value": {
-          "name": "Yes",
-          "$type": "jetbrains.charisma.customfields.complex.enumeration.EnumBundleElement"
-        },
-        "$type": "jetbrains.charisma.customfields.complex.enumeration.SingleEnumIssueCustomField"
-      }
-    ],
-    "id": "25-348378",
-    "$type": "jetbrains.charisma.persistent.Issue"
-  };
 
   return {
     loadIssues: loadIssues
