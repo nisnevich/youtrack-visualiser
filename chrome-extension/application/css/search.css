@@ -1,0 +1,26 @@
+/* Styles for wrapping the search box */
+
+.searchContainer {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  min-width: 100px;
+  width: 250px;
+}
+
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('../fonts/glyphicons-halflings-regular.eot');
+  src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
+}
+
+.has-search .form-control-feedback {
+  right: initial;
+  left: 0;
+  color: #ccc;
+}
+
+.has-search .form-control {
+  padding-rig±ht: 12px;
+  padding-left: 34px;
+}

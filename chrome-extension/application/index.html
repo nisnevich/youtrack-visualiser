@@ -8,6 +8,8 @@
   <link href="lib/bootstrap.min.css" rel="stylesheet"/>
   <link href="lib/jquery-ui/jquery-ui.min.css" rel="stylesheet"/>
   <link href="lib/page-loader.css" rel="stylesheet">
+
+  <link href="css/search.css" rel="stylesheet" type="text/css"/>
   <link href="css/main.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
@@ -15,8 +17,16 @@
   <div class="content"></div>
   <div class="resizer"></div>
 </div>
-
 <div id="graph"></div>
+
+<div class="searchContainer">
+  <div class="searchBox">
+    <div class="form-group has-feedback has-search">
+      <span class="glyphicon glyphicon-search form-control-feedback"></span>
+      <input type="text" class="form-control" placeholder="Search">
+    </div>
+  </div>
+</div>
 
 <script id="sidebar-template" type="text/x-handlebars-template">
   <div class="container">
