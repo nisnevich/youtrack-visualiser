@@ -204,11 +204,11 @@ var Main = (function () {
 
   function switchToRelated(clockWise) {
     let getConnectedNode = function(edge, node) {
-      return edge.filter("node[id != '" + node.data().id + "']");
+      return edge.filter("node[display = 'element'][id != '" + node.data().id + "']");
     };
 
     if (!selectedNode) return;
-    let connectedEdges = selectedNode.connectedEdges();
+    let connectedEdges = selectedNode.connectedEdges("edge:visible");
     for (let i = 0; i < connectedEdges.length; i++) {
       let nodes = connectedEdges[i].connectedNodes();
       let connectedNode = getConnectedNode(nodes, selectedNode);
