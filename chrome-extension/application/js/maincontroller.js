@@ -11,7 +11,7 @@ var Main = (function () {
   };
 
   let options = {
-    layout: Settings.layoutType.cose,
+    layout: Settings.renderNodeLabels() ? Settings.layoutType.coseBilkent.usual : Settings.layoutType.coseBilkent.noLabels,
   };
 
   let keyDown = {
@@ -31,15 +31,23 @@ var Main = (function () {
   }
 
   function toggleResolvedVisibility() {
-    let activeNodes = [];
     cy.nodes().forEach(function (node) {
       if (node.data().issueData.field.resolved) {
         let isDisplayed = node.data("display");
         node.data("display", isDisplayed === "none" ? "element" : "none");
-      } else {
-        activeNodes.push(node);
       }
     });
+    setTimeout(function () {
+      cy.fit(cy.$("node[display = 'element']"), 30);
+    }, 100);
+  }
+
+  function toggleLabels() {
+    Settings.setRenderNodeLabels(!Settings.renderNodeLabels());
+    cy.nodes().forEach(function (node) {
+      node.data("label", Settings.renderNodeLabels() ? node.data().issueData.field.summary.value : "");
+    });
+
     setTimeout(function () {
       cy.fit(cy.$("node[display = 'element']"), 30);
     }, 100);
@@ -88,11 +96,21 @@ var Main = (function () {
 
   // doc: http://dmauro.github.io/Keypress/
   // key names: https://github.com/dmauro/Keypress/blob/master/keypress.coffee#L757-864
-  windowKeyListener.register_many([{
+  windowKeyListener.register_many([
+    {
       "keys": "ctrl r",
       "prevent_default": true,
       "on_keyup": function (event) {
         toggleResolvedVisibility();
+        cy.layout(options.layout).run();
+      }
+    },
+    {
+      "keys": "ctrl l",
+      "prevent_default": true,
+      "on_keyup": function (event) {
+        toggleLabels();
+        options.layout = Settings.renderNodeLabels() ? Settings.layoutType.coseBilkent.usual : Settings.layoutType.coseBilkent.noLabels;
         cy.layout(options.layout).run();
       }
     },
@@ -153,7 +171,8 @@ var Main = (function () {
     }
   ]);
 
-  windowKeyListener.register_many([{
+  windowKeyListener.register_many([
+      {
       "keys": "down",
       "prevent_default": true,
       "on_keydown": function (event) {

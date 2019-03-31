@@ -11,14 +11,14 @@ var Graph = (function () {
 
       let node = {
         data: {
-          label: issue.field.summary.value,
+          label: Settings.renderNodeLabels() ? issue.field.summary.value : "",
           id: issue.id,
           depthLevel: issue.depthLevel,
           issueData: issue,
-          display: "element"
+          display: "element",
           // todo make labels clickable http://js.cytoscape.org/#style/events
         },
-        classes: 'bottom-center multiline-auto'
+        classes: 'middle-center multiline-auto'
       };
       nodes.push(node);
 
@@ -140,6 +140,7 @@ var Graph = (function () {
       }
     }
 
+    options.layout.nodeDimensionsIncludeLabels = Settings.renderNodeLabels();
     // http://js.cytoscape.org/#init-opts/container
     window.cy = cytoscape({
       container: Main.$dom.graphContainer,
