@@ -21,7 +21,6 @@ var YouTrack = (function () {
 
   function loadIssuesInternal(rootIssueId, callback, depth) {
     let getUrl = function (rootIssueId) {
-      // return `https://youtrack.jetbrains.com/api/issues/${rootIssueId}?fields=id,project(shortName),numberInProject,summary,wikifiedDescription,resolved,fields(projectCustomField(field(name)),value(name)),links(direction,linkType(name,directed,sourceToTarget,targetToSource),issues(id,project(shortName),numberInProject)),votes,tags(name),attachments(id)`;
       return `https://youtrack.jetbrains.com/rest/issue/${rootIssueId}?wikifyDescription=true`;
     };
 

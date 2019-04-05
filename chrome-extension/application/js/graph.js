@@ -5,8 +5,17 @@ var Graph = (function () {
 
   // http://js.cytoscape.org/#layouts/preset
 
-  function render(issuesList, options) {
+  let getIssueById = function (targetId, issuesList) {
+    for (let i = 0; i < issuesList.length; i++) {
+      if (issuesList[i].id === targetId) {
+        return issuesList[i];
+      }
+    }
+  };
+
+  function render(options) {
     let nodes = [], edges = [];
+    let issuesList = options.issuesList;
     for (let issue of issuesList) {
 
       let node = {
@@ -20,7 +29,9 @@ var Graph = (function () {
         },
         classes: 'middle-center multiline-auto'
       };
-      nodes.push(node);
+      if (Settings.renderClosedIssues() || !issue.field.resolved) {
+        nodes.push(node);
+      }
 
       for (let link of issue.field.links.value) {
         let edgeData = {
@@ -29,7 +40,10 @@ var Graph = (function () {
           source: issue.id,
           target: link.value
         };
-
+        let linkedIssue = getIssueById(link.value, issuesList);
+        if (!Settings.renderClosedIssues() && (issue.field.resolved || (linkedIssue && linkedIssue.field.resolved))) {
+          continue;
+        }
         let duplicateEdge = false;
         for (let edge of edges) {
           let t = edge.data.source === edgeData.source
@@ -243,15 +257,15 @@ var Graph = (function () {
   return {
     render: render,
     node: {
-      select: function(node) {
+      select: function (node) {
         node.addClass("selected");
       },
-      unselect: function(node) {
+      unselect: function (node) {
         if (node) {
           node.removeClass("selected");
         }
       },
-      center: function(node) {
+      center: function (node) {
         cy.animate({
           center: {
             eles: node

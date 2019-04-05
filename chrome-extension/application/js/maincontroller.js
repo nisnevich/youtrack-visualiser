@@ -25,21 +25,15 @@ var Main = (function () {
     YouTrack.loadIssues(rootId, depth, function (issuesList) {
       console.log(`Loaded ${issuesList.length} issues`);
       console.log(issuesList);
+      options.issuesList = issuesList;
       options.rootId = rootId;
-      Graph.render(issuesList, options);
+      Graph.render(options);
     });
   }
 
   function toggleResolvedVisibility() {
     Settings.setRenderClosedIssues(!Settings.renderClosedIssues());
-    cy.nodes().forEach(function (node) {
-      if (node.data().issueData.field.resolved) {
-        node.data("display", node.data("display") === "none" ? "element" : "none");
-      }
-    });
-    setTimeout(function () {
-      cy.fit(cy.$("node[display = 'element']"), 30);
-    }, 100);
+    Graph.render(options);
   }
 
   function toggleLabels() {
@@ -102,7 +96,6 @@ var Main = (function () {
       "prevent_default": true,
       "on_keyup": function (event) {
         toggleResolvedVisibility();
-        cy.layout(options.layout).run();
       }
     },
     {
