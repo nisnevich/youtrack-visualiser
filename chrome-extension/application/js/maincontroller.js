@@ -31,10 +31,10 @@ var Main = (function () {
   }
 
   function toggleResolvedVisibility() {
+    Settings.setRenderClosedIssues(!Settings.renderClosedIssues());
     cy.nodes().forEach(function (node) {
       if (node.data().issueData.field.resolved) {
-        let isDisplayed = node.data("display");
-        node.data("display", isDisplayed === "none" ? "element" : "none");
+        node.data("display", node.data("display") === "none" ? "element" : "none");
       }
     });
     setTimeout(function () {
