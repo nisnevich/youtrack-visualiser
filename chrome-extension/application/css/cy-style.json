@@ -64,7 +64,6 @@
       "text-background-opacity": 0.8,
       "text-background-shape": "roundrectangle",
       "text-background-padding": "3px"
-
     }
   },
 
@@ -104,6 +103,13 @@
     "selector": ".bottom-center",
     "style": {
       "text-valign": "bottom",
+      "text-halign": "center"
+    }
+  },
+  {
+    "selector": ".middle-center",
+    "style": {
+      "text-valign": "center",
       "text-halign": "center"
     }
   },

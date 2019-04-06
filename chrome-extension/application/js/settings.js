@@ -4,27 +4,29 @@ var Settings = (function(){
   let keys = {
     renderResolved: "renderResolved",
     rootIssueId: "rootIssueId",
+    renderNodeLabels: "renderNodeLabels",
   };
 
   return {
     defaults: {
-      padding: 30,
-
       minNodeSize: 30,
       maxNodeSize: 60,
       sidebarRelativeSize: 0.3,
-      // colorMin: "#4298CC",
-      // colorMax: "#5C38D4",
       colorMin: "rgb(66,152,204)", // #4298CC
-      colorMax: "rgb(62,121,227)",
+      colorMax: "rgb(62,121,227)", // #5C38D4
       maxVotesMatter: 100,
 
       doubleClickTimeout: 600,
+      scrollOffset: {
+        usual: 50,
+        fast: 500
+      },
+      resizeOffset: 20,
 
       animation: {
         center: {
           duration: 500,
-          easing: "ease-out-expo",
+          easing: "ease-out-expo", // http://js.cytoscape.org/#style/transition-animation
           zoom: 0.8
         }
       }
@@ -35,14 +37,20 @@ var Settings = (function(){
     setRootIssueId: function (value) {
       localStorage[keys.rootIssueId] = value;
     },
+    renderNodeLabels: function(){
+      let storageValue = localStorage[keys.renderResolved];
+      if (storageValue === undefined || storageValue === null) {
+        return true;
+      }
+      return localStorage[keys.renderNodeLabels] === 'true';
+    },
+    setRenderNodeLabels: function (value) {
+      localStorage[keys.renderNodeLabels] = Boolean(value);
+    },
     renderClosedIssues: function () {
       let storageValue = localStorage[keys.renderResolved];
       if (storageValue === undefined || storageValue === null) {
-        if (localStorage["nodesAmount"] && localStorage["nodesAmount"] > renderResolvedNodesLimit) {
-          console.log("Resolved issues not displayed: too much nodes.");
-          return false;
-        }
-        return false;
+        return true;
       }
       return storageValue !== "false";
     },
@@ -197,6 +205,56 @@ var Settings = (function(){
         transform: function (node, position) {
           return position;
         } // transform a given node position. Useful for changing flow direction in discrete layouts
+      },
+      coseBilkent: {
+        usual: {
+          name: 'cose-bilkent',
+
+          // // Whether to include labels in node dimensions. Useful for avoiding label overlap
+          nodeDimensionsIncludeLabels: true,
+          // // number of ticks per frame; higher is faster but more jerky
+          // refresh: 30,
+          // // Node repulsion (non overlapping) multiplier
+          nodeRepulsion: 100000,
+          // // Ideal (intra-graph) edge length
+          idealEdgeLength: 100,
+          // // Divisor to compute edge forces
+          edgeElasticity: 0.2,
+          // // Nesting factor (multiplier) to compute ideal edge length for inter-graph edges
+          // nestingFactor: 1,
+          // // Gravity force (constant)
+          // gravity: 1,
+          // // Maximum number of iterations to perform
+          // numIter: 100000,
+          // // Whether to tile disconnected nodes
+          // tile: true,
+          // // Type of layout animation. The option set is {'during', 'end', false}
+          // animate: false,
+          // // Amount of vertical space to put between degree zero nodes during tiling (can also be a function)
+          // tilingPaddingVertical: 10,
+          // // Amount of horizontal space to put between degree zero nodes during tiling (can also be a function)
+          // tilingPaddingHorizontal: 10,
+          // // Gravity range (constant) for compounds
+          // gravityRangeCompound: 1.5,
+          // // Gravity force (constant) for compounds
+          // gravityCompound: 1.0,
+          // // Gravity range (constant)
+          // gravityRange: 3.8,
+          // // Initial cooling factor for incremental layout
+          // initialEnergyOnIncremental: 0.5
+        },
+        noLabels: {
+          name: 'cose-bilkent',
+          idealEdgeLength: 50,
+          edgeElasticity: 0.2,
+        },
+        more500: {
+          name: 'cose-bilkent',
+          nodeDimensionsIncludeLabels: true,
+          nodeRepulsion: 1000000,
+          idealEdgeLength: 150,
+          edgeElasticity: 0.05,
+        }
       }
     }
   }
