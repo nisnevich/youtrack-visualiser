@@ -57,7 +57,7 @@ var YouTrack = (function () {
       },
       error: function (xhr, status, object) {
         console.error("Unable to load issues: " + status);
-        console.error(object);
+        console.error(xhr.responseJSON);
       },
       complete: function () {
         issuesToVisitCounter--;
