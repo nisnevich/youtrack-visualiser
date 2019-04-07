@@ -33,6 +33,7 @@ var Graph = (function () {
         nodes.push(node);
       }
 
+      if (!issue.field.links) continue;
       for (let link of issue.field.links.value) {
         let edgeData = {
           linkType: link.type,
@@ -180,6 +181,7 @@ var Graph = (function () {
     cy.on('tap', Main.bindings.cy.tap);
     cy.on('doubleTap', Main.bindings.cy.doubleTap);
     document.onkeyup = Main.bindings.document.onkeyup;
+    document.onkeydown = Main.bindings.document.onkeydown;
 
     // cy.on('tap', 'node', function () {
     //   let nodes = this;

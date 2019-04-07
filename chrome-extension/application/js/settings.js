@@ -28,7 +28,31 @@ var Settings = (function(){
           duration: 500,
           easing: "ease-out-expo", // http://js.cytoscape.org/#style/transition-animation
           zoom: 0.8
+        },
+        searchShowing: {
+          type: "slideToggle",
+          options: {
+            duration: 200
+          }
         }
+      },
+      searchOptions: {
+        shouldSort: true,
+        tokenize: true,
+        matchAllTokens: true,
+        findAllMatches: true,
+        // includeScore: true,
+        // includeMatches: true,
+        threshold: 0.6,
+        location: 0,
+        distance: 1000,
+        maxPatternLength: 32,
+        minMatchCharLength: 2,
+        keys: [
+          "id",
+          "field.summary.value",
+          "field.description.value"
+        ]
       }
     },
     getRootIssueId: function(){

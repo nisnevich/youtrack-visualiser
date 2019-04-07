@@ -43,7 +43,7 @@ var YouTrack = (function () {
         for (let field of fieldsList) {
           issue.field[field.name] = field;
         }
-        if (depth === maxDepthLevel) {
+        if (depth === maxDepthLevel || !issue.field.links) {
           return;
         }
         for (let issueLink of issue.field.links.value) {
@@ -58,6 +58,8 @@ var YouTrack = (function () {
       error: function (xhr, status, object) {
         console.error("Unable to load issues: " + status);
         console.error(xhr.responseJSON);
+        $("#errorContainer").show();
+        $("#errorContainer").html("YouTrack: " + xhr.responseJSON.value);
       },
       complete: function () {
         issuesToVisitCounter--;

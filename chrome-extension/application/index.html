@@ -6,7 +6,6 @@
   <title>Graph Visualisation</title>
 
   <link href="lib/bootstrap.min.css" rel="stylesheet"/>
-  <link href="lib/jquery-ui/jquery-ui.min.css" rel="stylesheet"/>
   <link href="lib/page-loader.css" rel="stylesheet">
 
   <link href="css/search.css" rel="stylesheet" type="text/css"/>
@@ -20,16 +19,31 @@
 <div id="graph"></div>
 
 <div class="searchContainer">
-  <div class="searchBox">
-    <div class="form-group has-feedback has-search">
-      <span class="glyphicon glyphicon-search form-control-feedback"></span>
-      <input type="text" class="form-control" placeholder="Search">
+  <div class="container">
+    <div class="row top7">
+      <div class="col">
+        <div class="searchBox">
+          <div class="form-group has-feedback has-search">
+            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            <input autofocus class="form-control" placeholder="Search" type="text">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="container searchResultsContainer"></div>
+      </div>
     </div>
   </div>
 </div>
 
+<div class="alert alert-danger" id="errorContainer" role="alert">
+  This is a danger alert—check it out!
+</div>
+
 <!--TODO https://semantic-ui.com/introduction/build-tools.html-->
-<script id="sidebar-template" type="text/x-handlebars-template">
+<script id="sidebarTemplate" type="text/x-handlebars-template">
   <div class="container">
     <div class="row top7">
       <div class="col">
@@ -69,6 +83,21 @@
   </div>
 </script>
 
+<script id="searchResultTemplate" type="text/x-handlebars-template">
+  {{#each this}}
+    <div class="row">
+      <div class="col searchResultLines">
+        <div class="search-issue-id">
+          {{id}}
+        </div>
+        <div class="search-issue-title">
+          {{field.summary.value}}
+        </div>
+      </div>
+    </div>
+  {{/each }}
+</script>
+
 <script src="lib/pace.min.js"></script>
 <!--<script src="lib/bootstrap.min.js"></script>-->
 <script src="lib/jquery-3.3.1.min.js"></script>
@@ -79,6 +108,7 @@
 <script src="lib/handlebars-v4.1.1.js"></script>
 <script src="lib/keypress-2.1.5.min.js"></script>
 <script src="lib/cosy-bilkent/cytoscape-cose-bilkent.js"></script>
+<script src="lib/fuse.min.js"></script>
 
 <script src="js/settings.js"></script>
 <script src="js/youtrack.js"></script>

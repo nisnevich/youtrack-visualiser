@@ -6,8 +6,14 @@ var Main = (function () {
       content: $(".sidebar > .content"),
       resizer: $(".sidebar > .resizer")
     },
-    sidebarTemplate: $("#sidebar-template"),
-    graphContainer: $("#graph")
+    sidebarTemplate: $("#sidebarTemplate"),
+    graphContainer: $("#graph"),
+    search: {
+      container: $(".searchContainer"),
+      field: $(".searchContainer").find("input[type='text']"),
+      resultsContainer: $(".searchResultsContainer"),
+      resultsTemplate: $("#searchResultTemplate")
+    }
   };
 
   let options = {
@@ -15,10 +21,7 @@ var Main = (function () {
   };
 
   let keyDown = {
-    shiftLeft: false,
-    ctrlLeft: false,
-    altLeft: false,
-    metaLeft: false,
+    ctrl: false,
   };
 
   function loadIssues(rootId, depth) {
@@ -62,13 +65,13 @@ var Main = (function () {
     $dom.sidebar.panel.toggle("slide");
   }
 
-  $dom.sidebar.resizer.mousedown(function(e) {
-    let resize = function(e) {
+  $dom.sidebar.resizer.mousedown(function (e) {
+    let resize = function (e) {
       let left = $dom.sidebar.panel.get(0).getBoundingClientRect().left;
       $dom.sidebar.panel.css("width", e.pageX - left + 'px');
       $("body").css("cursor", "col-resize");
     };
-    let stopResize = function() {
+    let stopResize = function () {
       window.removeEventListener('mousemove', resize);
       $("body").css("cursor", "auto");
     };
@@ -78,7 +81,9 @@ var Main = (function () {
   });
 
   let sidebarTemplate = Handlebars.compile($dom.sidebarTemplate.html());
+  let searchTemplate = Handlebars.compile($dom.search.resultsTemplate.html());
   let windowKeyListener = new window.keypress.Listener();
+  let nonTypingKeyListener = new window.keypress.Listener();
   let tappedBefore, tappedTimeout;
   let selectedNode = null;
   let watchingNode = null;
@@ -93,14 +98,12 @@ var Main = (function () {
   windowKeyListener.register_many([
     {
       "keys": "ctrl r",
-      "prevent_default": true,
       "on_keyup": function (event) {
         toggleResolvedVisibility();
       }
     },
     {
       "keys": "ctrl l",
-      "prevent_default": true,
       "on_keyup": function (event) {
         toggleLabels();
         options.layout = Settings.renderNodeLabels() ? Settings.layoutType.coseBilkent.usual : Settings.layoutType.coseBilkent.noLabels;
@@ -133,20 +136,7 @@ var Main = (function () {
       }
     },
     {
-      "keys": "right",
-      "on_keyup": function (event) {
-        switchToRelated(true);
-      }
-    },
-    {
-      "keys": "left",
-      "on_keyup": function (event) {
-        switchToRelated(false);
-      }
-    },
-    {
       "keys": "meta shift right",
-      "prevent_default": true,
       is_unordered: true,
       "on_keydown": function (event) {
         let width = parseInt($dom.sidebar.panel.css("width"));
@@ -155,17 +145,25 @@ var Main = (function () {
     },
     {
       "keys": "meta shift left",
-      "prevent_default": true,
       is_unordered: true,
       "on_keydown": function (event) {
         let width = parseInt($dom.sidebar.panel.css("width"));
         $dom.sidebar.panel.css("width", width - Settings.defaults.resizeOffset + 'px');
       }
+    },
+    {
+      "keys": "control",
+      "on_keydown": function (event) {
+        keyDown.ctrl = true;
+      },
+      "on_keyup": function (event) {
+        keyDown.ctrl = false;
+      },
     }
   ]);
 
   windowKeyListener.register_many([
-      {
+    {
       "keys": "down",
       "prevent_default": true,
       "on_keydown": function (event) {
@@ -214,8 +212,58 @@ var Main = (function () {
     }
   ]);
 
+  nonTypingKeyListener.register_many([
+    {
+      "keys": "right",
+      "on_keyup": function (event) {
+        switchToRelated(true);
+      }
+    },
+    {
+      "keys": "left",
+      "on_keyup": function (event) {
+        switchToRelated(false);
+      }
+    },
+    {
+      "keys": "backspace",
+      "prevent_default": true,
+      "on_keydown": function (event) {
+        if ($dom.search.container.is(":visible")) {
+          $dom.search.field.val(function (i, val) {
+            return val.substr(0, val.length - 1);
+          });
+          $dom.search.field.focus();
+          search();
+        }
+      }
+    }
+  ]);
+
+  $dom.search.field.focus(function () {
+    nonTypingKeyListener.stop_listening()
+  });
+
+  $dom.search.field.focusout(function () {
+    nonTypingKeyListener.listen();
+  });
+
+  $dom.search.field.on('input', function(e) {
+    search();
+  });
+
+  function search() {
+    let inputValue = Main.$dom.search.field.val();
+    if (inputValue.length === 0) {
+      Main.$dom.search.container[Settings.defaults.animation.searchShowing.type](Settings.defaults.animation.searchShowing.options);
+    }
+    let fuse = new Fuse(options.issuesList, Settings.defaults.searchOptions);
+    let searchResult = fuse.search(inputValue);
+    Main.$dom.search.resultsContainer.html(searchTemplate(searchResult));
+  }
+
   function switchToRelated(clockWise) {
-    let getConnectedNode = function(edge, node) {
+    let getConnectedNode = function (edge, node) {
       return edge.filter("node[display = 'element'][id != '" + node.data().id + "']");
     };
 
@@ -252,10 +300,20 @@ var Main = (function () {
     bindings: {
       document: {
         onkeyup: function (e) {
-          if (e.code.startsWith("Digit")) {
+          if (keyDown.ctrl && e.code.startsWith("Digit")) {
             let depthLevel = parseInt(e.code.replace(/\D/g, ''));
             window.location.hash = depthLevel;
             loadIssues(Settings.getRootIssueId(), depthLevel);
+          } else if (e.key.length === 1 && !$dom.search.field.is(":focus")) {
+            // TODO investigate quick typing problem; focus is gained to the input normally!
+            $dom.search.field.val(function (i, val) {
+              return val + e.key;
+            });
+            if (!$dom.search.container.is(":visible")) {
+              $dom.search.container[Settings.defaults.animation.searchShowing.type](Settings.defaults.animation.searchShowing.options);
+            }
+            $dom.search.field.focus();
+            search();
           }
         }
       },
@@ -292,7 +350,7 @@ var Main = (function () {
             tappedBefore = target;
           }
         },
-        doubleTap: function(event, target) {
+        doubleTap: function (event, target) {
           if (event) {
             Graph.node.center(target);
           }

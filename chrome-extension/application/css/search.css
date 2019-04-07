@@ -2,10 +2,38 @@
 
 .searchContainer {
   position: absolute;
-  top: 15px;
-  right: 25px;
-  min-width: 100px;
-  width: 250px;
+  top: 0;
+  right: 0;
+  min-width: 250px;
+  width: 33%;
+  display:none;
+  background: rgba(255, 255, 255, 0.85);
+}
+.searchBox {
+  margin-top: 15px;
+  margin-right: 25px;
+}
+
+.searchResultLines {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.search-issue-id {
+  display: inline-block;
+  font-size: 14px;
+}
+.search-issue-title {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 14px;
+}
+.search-issue-id.disabled {
+  color: #737577;
+}
+.search-issue-title.disabled {
+  color: #737577;
 }
 
 @font-face {
