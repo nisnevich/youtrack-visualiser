@@ -36,7 +36,7 @@ var Settings = (function(){
           }
         }
       },
-      searchOptions: {
+      searchOptions: { // https://fusejs.io/
         shouldSort: true,
         tokenize: true,
         matchAllTokens: true,

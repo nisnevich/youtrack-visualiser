@@ -12,6 +12,7 @@ var YouTrack = (function () {
   let maxDepthLevel;
 
   function loadIssues(rootIssueId, depthLevel, callback) {
+    // fixme loads many duplicates; eg #5 https://youtrack.jetbrains.com/issue/IDEA-185562
     resultsList = [];
     visitedIssueIds = [rootIssueId];
     maxDepthLevel = depthLevel;

@@ -111,17 +111,6 @@ var Main = (function () {
       }
     },
     {
-      "keys": "space",
-      "prevent_default": true,
-      "on_keyup": function (event) {
-        // todo select last when history implemented
-        if (selectedNode) {
-          Graph.node.center(selectedNode);
-          showSidePanel(selectedNode.data().issueData);
-        }
-      }
-    },
-    {
       "keys": "escape",
       "prevent_default": true,
       "on_keyup": function (event) {
@@ -223,6 +212,16 @@ var Main = (function () {
       "keys": "left",
       "on_keyup": function (event) {
         switchToRelated(false);
+      }
+    },
+    {
+      "keys": "space",
+      "on_keyup": function (event) {
+        // todo select last when history implemented
+        if (selectedNode) {
+          Graph.node.center(selectedNode);
+          showSidePanel(selectedNode.data().issueData);
+        }
       }
     },
     {

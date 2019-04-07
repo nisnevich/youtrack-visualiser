@@ -8,10 +8,15 @@
   width: 33%;
   display:none;
   background: rgba(255, 255, 255, 0.85);
+  height: 100%;
+  overflow: auto;
 }
 .searchBox {
-  margin-top: 15px;
-  margin-right: 25px;
+  margin-top: 5px;
+  margin-right: 15px;
+}
+.searchResultsContainer {
+  margin-top: -8px;
 }
 
 .searchResultLines {
