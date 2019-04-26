@@ -30,6 +30,7 @@ var Main = (function () {
       console.log(issuesList);
       options.issuesList = issuesList;
       options.rootId = rootId;
+      options.depth = depth;
       Graph.render(options);
     });
   }

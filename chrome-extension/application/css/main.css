@@ -64,10 +64,10 @@ a:active {
 }
 
 .sidebar.resolved {
-  background: rgba(116, 146, 153, 0.9);
+  background: rgba(139, 139, 139, 0.9);
 }
 .sidebar.unresolved {
-  background: rgba(66,152,204, 0.9);
+  background: rgba(32, 76, 119, 0.9);
 }
 
 .sidebar img {

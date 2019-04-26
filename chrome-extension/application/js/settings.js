@@ -12,8 +12,8 @@ var Settings = (function(){
       minNodeSize: 30,
       maxNodeSize: 60,
       sidebarRelativeSize: 0.3,
-      colorMin: "rgb(66,152,204)", // #4298CC
-      colorMax: "rgb(62,121,227)", // #5C38D4
+      colorMin: "#3474B4", // #4298CC
+      colorMax: "#C1534B", // #332fd4
       maxVotesMatter: 100,
 
       doubleClickTimeout: 600,
@@ -253,7 +253,7 @@ var Settings = (function(){
           // // Whether to tile disconnected nodes
           // tile: true,
           // // Type of layout animation. The option set is {'during', 'end', false}
-          // animate: false,
+          animate: false,
           // // Amount of vertical space to put between degree zero nodes during tiling (can also be a function)
           // tilingPaddingVertical: 10,
           // // Amount of horizontal space to put between degree zero nodes during tiling (can also be a function)
@@ -271,10 +271,12 @@ var Settings = (function(){
           name: 'cose-bilkent',
           idealEdgeLength: 50,
           edgeElasticity: 0.2,
+          animate: false,
         },
         more500: {
           name: 'cose-bilkent',
           nodeDimensionsIncludeLabels: true,
+          animate: false,
           nodeRepulsion: 1000000,
           idealEdgeLength: 150,
           edgeElasticity: 0.05,

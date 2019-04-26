@@ -87,6 +87,15 @@ var Graph = (function () {
       }
 
       function interpolateColors(color1, color2, steps) {
+        let hexToRgb = function (hex) {
+          let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          return result ? [
+            parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)
+          ] : null;
+        };
+
         let interpolateColor = function (color1, color2, factor) {
           let result = color1.slice();
           for (let i = 0; i < 3; i++) {
@@ -95,11 +104,9 @@ var Graph = (function () {
           return result;
         };
         let stepFactor = 1 / (steps - 1), colors = [];
-        color1 = color1.match(/\d+/g).map(Number);
-        color2 = color2.match(/\d+/g).map(Number);
 
         for (let i = 0; i < steps; i++) {
-          let color = interpolateColor(color1, color2, stepFactor * i);
+          let color = interpolateColor(hexToRgb(color1), hexToRgb(color2), stepFactor * i);
           colors.push(`rgb(${color[0]},${color[1]},${color[2]})`);
         }
         return colors;
@@ -140,7 +147,7 @@ var Graph = (function () {
           case "Depend":
             break;
           case "Duplicate":
-            edge["classes"] = "duplicate";
+            edge["classes"] = "resolved";
             break;
           case "Subtask":
             // edge.data["target-arrow-shape"] = "diamond";
@@ -182,6 +189,19 @@ var Graph = (function () {
     cy.on('doubleTap', Main.bindings.cy.doubleTap);
     document.onkeyup = Main.bindings.document.onkeyup;
     document.onkeydown = Main.bindings.document.onkeydown;
+
+    cy.ready(function(){
+      // when rendering, labels are centered to make the layout cleaner
+      cy.nodes().removeClass("middle-center");
+      cy.nodes().addClass("bottom-center");
+
+      cy.animate({
+        zoom: cy.zoom() - 0.2 * Math.pow(0.5, options.depth - 1)
+      }, {
+        duration: 1200,
+        easing: "ease-out-expo"
+      });
+    });
 
     // cy.on('tap', 'node', function () {
     //   let nodes = this;

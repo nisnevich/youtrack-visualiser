@@ -9,15 +9,36 @@
     }
   },
   {
-    "selector": "edge.duplicate",
+    "selector": "edge.resolved",
     "style": {
       "curve-style": "haystack",
       "line-style": "dashed",
-      "line-color": "#87A4AB",
-      "target-arrow-color": "#87A4AB",
+      "line-color": "#8B8B8B",
+      "target-arrow-color": "#8B8B8B",
       "target-arrow-shape": "triangle",
       "width": 2,
       "arrow-scale":1
+    }
+  },
+  {
+    "selector": "node.resolved.selected",
+    "style": {
+      "border-color": "#32484C",
+      "border-width": 2,
+      "opacity": 0.75
+    }
+  },
+  {
+    "selector": "node.resolved",
+    "style": {
+      "background-color": "#8B8B8B",
+      "display": "data(display)"
+    }
+  },
+  {
+    "selector": "node.resolved[label]",
+    "style": {
+      "text-background-opacity": 0.4
     }
   },
 
@@ -39,14 +60,6 @@
     }
   },
   {
-    "selector": "node.resolved.selected",
-    "style": {
-      "border-color": "#32484C",
-      "border-width": 2,
-      "opacity": 0.75
-    }
-  },
-  {
     "selector": "node",
     "style": {
       "background-color": "data(color)",
@@ -59,25 +72,10 @@
     "selector": "node[label]",
     "style": {
       "label": "data(label)",
-      "color": "#ffffff",
       "text-background-color": "data(color)",
       "text-background-opacity": 0.8,
       "text-background-shape": "roundrectangle",
       "text-background-padding": "3px"
-    }
-  },
-
-  {
-    "selector": "node.resolved",
-    "style": {
-      "background-color": "#749299",
-      "display": "data(display)"
-    }
-  },
-  {
-    "selector": "node.resolved[label]",
-    "style": {
-      "text-background-opacity": 0.4
     }
   },
   {
