@@ -6,10 +6,15 @@
 
 Controls:
 - Ctrl-1, Ctrl-2... - open N-depth graph
-- LMB on issue node: preview
-- RMB on issue node: context menu
+- LMB on issue node: select issue & open preview
+- RMB: context menu
 - Ctrl-R - toggle "Hide Resolved" mode
 - Ctrl-L - toggle "Hide Labels" mode
-- ~~start typing: search~~ (work in progress) 
+- ~~start typing: search~~ (work in progress)
+
+Navigation:
+- left, right arrows: switch via related issues of the selected node
+- Space: focus the selected node
+- scroll to zoom
 
 ![alt text](img/screenshot.png)
