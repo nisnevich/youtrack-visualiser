@@ -20,6 +20,17 @@
       "arrow-scale":1
     }
   },
+  {
+    "selector": "edge.leadsto",
+    "style": {
+      "curve-style": "haystack",
+      "line-color": "#00996F",
+      "target-arrow-color": "#00996F",
+      "target-arrow-shape": "triangle",
+      "width": 4,
+      "arrow-scale":2
+    }
+  },
 
   {
     "selector": "node.central",

@@ -46,10 +46,8 @@ var Graph = (function () {
         }
         let duplicateEdge = false;
         for (let edge of edges) {
-          let t = edge.data.source === edgeData.source
-              && edge.data.target === edgeData.target
-              || edge.data.source === edgeData.target
-              && edge.data.target === edgeData.source;
+          let t = edge.data.source === edgeData.source && edge.data.target === edgeData.target
+              || edge.data.source === edgeData.target && edge.data.target === edgeData.source;
           if (t) {
             duplicateEdge = true;
           }
@@ -134,7 +132,9 @@ var Graph = (function () {
           case "Relates":
           case "Folllowed":
           case "Reused in":
+            break;
           case "Leads to":
+            edge["classes"] = "leadsto";
             break;
           case "Depend":
             break;
