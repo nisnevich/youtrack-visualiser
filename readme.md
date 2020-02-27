@@ -1,6 +1,6 @@
 # YouTrack relations visualiser for Chrome
 
-1. Install the extension
+1. Install the extension: you can follow https://superuser.com/questions/247651/how-does-one-install-an-extension-for-chrome-browser-from-the-local-file-system
 2. Go to extension options -> Specify Hub authentication token: https://www.jetbrains.com/help/hub/manage-authentication-tokens.html
 3. Open some issue and click on the extension icon. Enjoy
 
